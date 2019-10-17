@@ -6,18 +6,23 @@ import java.util.List;
 
 import de.pixelwars.core.IAction;
 import de.pixelwars.core.IBuilding;
-import de.pixelwars.core.IDetailedInformation;
+import de.pixelwars.core.ILocation;
 import de.pixelwars.core.IPlayer;
 import de.pixelwars.core.actions.impl.CreateCitizenAction;
 
-public class Building implements IBuilding, IDetailedInformation {
+public class Building extends AbstractElement implements IBuilding {
 
 	private double _lifePoints;
 	private IPlayer _owner;
 	private String _name;
 	private List<IAction> _actions;
 
+	public Building(ILocation location) {
+		super(location);
+	}
+
 	public Building() {
+		this(new Location(0, 0));
 		_actions = new ArrayList<>();
 	}
 

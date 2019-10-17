@@ -13,7 +13,7 @@ public class PixelWars {
 		var client=new PixelWarClient();
 		new Thread(client).start();
 		
-		GameWindow window = new GameWindow();
-		window.setVisible(true);
+//		GameWindow window = new GameWindow();
+//		window.setVisible(true);
 	}
 }
