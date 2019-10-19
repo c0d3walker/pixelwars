@@ -12,8 +12,8 @@ import de.pixelwars.core.EActionType;
 import de.pixelwars.core.IGameEnvironment;
 import de.pixelwars.core.exchange.StringTransportObject;
 import de.pixelwars.core.net.Connection;
-import de.pixelwars.server.impl.GameEnvironment;
 import de.pixelwars.server.internal.ClientReceiver;
+import de.pixelwars.server.internal.ServerGameEnvironment;
 
 public class PixelWarConfigurationServer implements Runnable {
 	private List<Connection> _connections;
@@ -21,7 +21,7 @@ public class PixelWarConfigurationServer implements Runnable {
 
 	public PixelWarConfigurationServer() {
 		_connections = new ArrayList<>();
-		_environment = new GameEnvironment();
+		_environment = new ServerGameEnvironment();
 	}
 
 	private void setupModelExchange(int port) {

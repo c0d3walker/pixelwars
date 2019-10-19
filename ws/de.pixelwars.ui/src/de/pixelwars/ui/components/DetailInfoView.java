@@ -109,7 +109,8 @@ public class DetailInfoView extends JPanel {
 			_lifePointStatus.setText("");
 		} else {
 			_nameStatus.setText(information.getName());
-			var ownerName = information.getOwner() == null ? "" : information.getOwner().getName();
+//			var ownerName = information.getOwner() == null ? "" : information.getOwner().getName();
+			var ownerName ="Hugo";
 			_ownerStatus.setText(ownerName);
 			_lifePointStatus.setText(information.getLifePoints() + "");
 			var actionIterator = information.getActions();
@@ -117,7 +118,7 @@ public class DetailInfoView extends JPanel {
 				var action = actionIterator.next();
 				var button = new JButton();
 				button.setText(action.getName());
-				button.addActionListener(ae->action.execute());
+				button.addActionListener(ae->action.execute(null));
 				_actionPanel.add(button);
 			}
 		}

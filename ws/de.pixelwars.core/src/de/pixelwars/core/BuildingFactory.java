@@ -6,6 +6,7 @@ import de.pixelwars.core.impl.Building;
 public class BuildingFactory {
 	/**
 	 * creates a new main building
+	 * 
 	 * @param owner
 	 * @return the created building
 	 */
@@ -13,13 +14,14 @@ public class BuildingFactory {
 		var building = new Building();
 		building.setLifePoints(100);
 		building.setName("Main");
-		building.setOwner(owner);
+		building.setOwnerID(owner.getID());
 		building.addAction(new CreateCitizenAction());
 		return building;
 	}
-	
+
 	/**
 	 * creates a new mill
+	 * 
 	 * @param owner
 	 * @return the created building
 	 */
@@ -27,8 +29,8 @@ public class BuildingFactory {
 		var building = new Building();
 		building.setLifePoints(100);
 		building.setName("Mill");
-		building.setOwner(owner);
+		building.setOwnerID(owner.getID());
 		return building;
 	}
-	
+
 }

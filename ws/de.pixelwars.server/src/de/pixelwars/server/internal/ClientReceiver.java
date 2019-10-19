@@ -7,6 +7,7 @@ import de.pixelwars.core.EActionType;
 import de.pixelwars.core.IGameEnvironment;
 import de.pixelwars.core.exchange.StringTransportObject;
 import de.pixelwars.core.net.Connection;
+import de.pixelwars.server.actions.CreatePlayerAction;
 
 public class ClientReceiver implements Runnable {
 
@@ -21,10 +22,13 @@ public class ClientReceiver implements Runnable {
 	}
 
 	private void setupClientStateManagement() {
-		var gameRunning=new ClientState(null,EActionType.CREATE_BY_IDS);
-		var established = new ClientState(gameRunning, EActionType.CREATE_PLAYER);
-		var initial = new ClientState(established, EActionType.CONNECTION_CONFIRMED);
-		_state=initial;
+		var gameRunning = new ClientState();
+		var established = new ClientState();
+		var initial = new ClientState();
+		initial.addTransmision(EActionType.CONNECTION_CONFIRMED, established);
+		established.addTransmision(EActionType.CREATE_PLAYER, gameRunning);
+		gameRunning.addTransmision(EActionType.CREATE_BY_IDS, gameRunning);
+		_state = initial;
 	}
 
 	@Override
@@ -51,7 +55,25 @@ public class ClientReceiver implements Runnable {
 	}
 
 	private void handleStringTransportObjectRequest(StringTransportObject sto) {
-		System.out.println(sto.getActionType() + "" + sto.getValues()[0]);
+		EActionType actionType = sto.getActionType();
+		var nextState = _state.process(actionType);
+		if (nextState != null) {
+			switch (actionType) {
+			case CREATE_PLAYER:
+				var action = new CreatePlayerAction(_connection, sto.getValues()[0]);
+				_environment.scheduleAction(action);
+				break;
+			case CONNECTION_CONFIRMED:
+				// do nothing
+				break;
+			default:
+				break;
+			}
+			_state = nextState;
+//			System.out.println(sto.getActionType() + "" + sto.getValues()[0]);
+		} else {
+			System.err.println("Wrong type received: " + sto.getActionType());
+		}
 	}
 
 }

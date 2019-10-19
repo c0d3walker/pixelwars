@@ -1,23 +1,43 @@
 package de.pixelwars.server.internal;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import de.pixelwars.core.EActionType;
 
 public class ClientState {
 
-	private EActionType[] _allowedActionTypes;
-	private ClientState _next;
+	private List<Transmission> _transmissions;
 
-	public ClientState(ClientState next, EActionType... allowedActionTypes) {
-		_next = next;
-		_allowedActionTypes = allowedActionTypes;
+	public ClientState() {
+		_transmissions = new ArrayList<>();
 	}
 
-	public boolean process(EActionType current) {
-		var wasFound = false;
-		for (int i = 0; i < _allowedActionTypes.length && !wasFound; i++) {
-			wasFound = _allowedActionTypes[i] == current;
+	public ClientState process(EActionType current) {
+		var optinalTransmission = _transmissions.stream().filter(t -> t.getActionType() == current).findFirst();
+		return optinalTransmission.isPresent() ? optinalTransmission.get().getNextState() : null;
+	}
+
+	public void addTransmision(EActionType actionType, ClientState clientState) {
+		_transmissions.add(new Transmission(actionType, clientState));
+	}
+
+	private class Transmission {
+		private EActionType _actionType;
+		private ClientState _clientState;
+
+		public Transmission(EActionType actionType, ClientState clientState) {
+			_actionType = actionType;
+			_clientState = clientState;
 		}
-		return wasFound;
+
+		public EActionType getActionType() {
+			return _actionType;
+		}
+
+		public ClientState getNextState() {
+			return _clientState;
+		}
 	}
-	
+
 }

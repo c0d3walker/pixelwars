@@ -9,11 +9,13 @@ public interface IAction {
 	
 	/**
 	 * @return true iff the action can be executed
+	 * @param environment of the game
 	 */
-	default boolean isExecutable() {return true;}
+	default boolean isExecutable(IGameEnvironment environment) {return true;}
 	
 	/**
 	 * executes the action
+	 * @param environment of the game
 	 */
-	void execute();
+	void execute(IGameEnvironment environment);
 }

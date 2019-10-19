@@ -4,21 +4,22 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import de.pixelwars.core.EBuildingConstants;
 import de.pixelwars.core.IAction;
 import de.pixelwars.core.IBuilding;
+import de.pixelwars.core.IDetailedInformation;
 import de.pixelwars.core.ILocation;
 import de.pixelwars.core.IPlayer;
 import de.pixelwars.core.actions.impl.CreateCitizenAction;
 
-public class Building extends AbstractElement implements IBuilding {
+public class Building extends AbstractOwnedElement implements IBuilding {
 
 	private double _lifePoints;
-	private IPlayer _owner;
 	private String _name;
 	private List<IAction> _actions;
 
 	public Building(ILocation location) {
-		super(location);
+		super(0);
 	}
 
 	public Building() {
@@ -30,10 +31,6 @@ public class Building extends AbstractElement implements IBuilding {
 		_name = name;
 	}
 
-	public void setOwner(IPlayer player) {
-		_owner = player;
-	}
-
 	public void setLifePoints(double lifePoints) {
 		_lifePoints = lifePoints;
 	}
@@ -41,11 +38,6 @@ public class Building extends AbstractElement implements IBuilding {
 	@Override
 	public String getName() {
 		return _name;
-	}
-
-	@Override
-	public IPlayer getOwner() {
-		return _owner;
 	}
 
 	@Override
@@ -65,6 +57,18 @@ public class Building extends AbstractElement implements IBuilding {
 	@Override
 	public Iterator<IAction> getActions() {
 		return _actions.iterator();
+	}
+
+	@Override
+	public EBuildingConstants getBuildingType() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public boolean isBuilt() {
+		// TODO Auto-generated method stub
+		return false;
 	}
 
 }
