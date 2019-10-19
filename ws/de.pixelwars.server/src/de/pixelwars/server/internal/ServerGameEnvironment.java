@@ -2,6 +2,7 @@ package de.pixelwars.server.internal;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Queue;
 import java.util.concurrent.PriorityBlockingQueue;
 
 import de.pixelwars.core.EBuildingConstants;
@@ -13,13 +14,15 @@ import de.pixelwars.core.ILocation;
 import de.pixelwars.core.IPlayer;
 import de.pixelwars.core.IUnit;
 import de.pixelwars.core.impl.Location;
+import de.pixelwars.core.trees.KDTree;
 import de.pixelwars.server.impl.ServerPlayerImpl;
 
 public class ServerGameEnvironment implements IGameEnvironment {
 
-	private PriorityBlockingQueue<ScheduledTask> _tasks;
+	private Queue<ScheduledTask> _tasks;
 	private List<ServerPlayerImpl> _playerList;
 	private ServerCoreElementFactory _coreElementFactory;
+	private KDTree _elementArea;
 
 	public ServerGameEnvironment() {
 		_playerList = new ArrayList<>();
@@ -27,6 +30,7 @@ public class ServerGameEnvironment implements IGameEnvironment {
 		_tasks = new PriorityBlockingQueue<ScheduledTask>(64, (c0, c1) -> {
 			return (int) (c0.getTimeToExecute() - c1.getTimeToExecute());
 		});
+		_elementArea = new KDTree();
 	}
 
 	@Override
@@ -65,7 +69,9 @@ public class ServerGameEnvironment implements IGameEnvironment {
 		// TODO refactor location as parameter
 		ILocation location = new Location(3, 4);
 		var owner = playerIdToPlayer(ownerID);
-		return _coreElementFactory.createBuilding(owner, buildingType, location, isBuild);
+		var building = _coreElementFactory.createBuilding(owner, buildingType, location, isBuild);
+		_elementArea.addElement(building);
+		return building;
 	}
 
 	private ServerPlayerImpl playerIdToPlayer(int ownerID) {
@@ -84,7 +90,9 @@ public class ServerGameEnvironment implements IGameEnvironment {
 		// TODO refactor location as parameter
 		ILocation location = new Location(10, 11);
 		var owner = playerIdToPlayer(ownerID);
-		return _coreElementFactory.createUnit(owner, unitType, location);
+		var unit = _coreElementFactory.createUnit(owner, unitType, location);
+		_elementArea.addElement(unit);
+		return unit;
 	}
 
 }
