@@ -41,9 +41,9 @@ public class PixelWarConfigurationServer implements Runnable {
 
 	private Connection createAndConfirmConnection(Socket client) throws IOException {
 		var os = client.getOutputStream();
-		var oos=new ObjectOutputStream(os);
+		var oos = new ObjectOutputStream(os);
 		var is = client.getInputStream();
-		var ois=new ObjectInputStream(is);
+		var ois = new ObjectInputStream(is);
 		var connection = new Connection(oos, ois);
 		oos.writeObject(new StringTransportObject(EActionType.CONNECTION_CONFIRMED));
 		_connections.add(connection);
@@ -52,6 +52,9 @@ public class PixelWarConfigurationServer implements Runnable {
 
 	@Override
 	public void run() {
+		var environmentThread = new Thread(_environment);
+		environmentThread.setName("Game Environment - Server");
+		environmentThread.start();
 		setupModelExchange(8888);
 
 	}

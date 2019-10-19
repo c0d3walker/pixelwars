@@ -30,6 +30,24 @@ public class ServerGameEnvironment implements IGameEnvironment {
 	}
 
 	@Override
+	public void run() {
+		// TODO replace with termination condition
+		while (true) {
+			var task = _tasks.peek();
+			if (task != null && task.getTimeToExecute() < System.currentTimeMillis()) {
+				var action = _tasks.poll().getAction();
+				action.execute(this);
+			} else {
+				try {
+					Thread.sleep(20);
+				} catch (InterruptedException ex) {
+					ex.printStackTrace();
+				}
+			}
+		}
+	}
+
+	@Override
 	public void scheduleAction(IAction action) {
 		var scheduledTask = new ScheduledTask(System.currentTimeMillis(), action);
 		_tasks.add(scheduledTask);
@@ -64,7 +82,7 @@ public class ServerGameEnvironment implements IGameEnvironment {
 	@Override
 	public IUnit createUnit(int ownerID, EUnitConstants unitType) {
 		// TODO refactor location as parameter
-		ILocation location = new Location(10,11);
+		ILocation location = new Location(10, 11);
 		var owner = playerIdToPlayer(ownerID);
 		return _coreElementFactory.createUnit(owner, unitType, location);
 	}

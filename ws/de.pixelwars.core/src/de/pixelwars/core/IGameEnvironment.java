@@ -1,6 +1,6 @@
 package de.pixelwars.core;
 
-public interface IGameEnvironment {
+public interface IGameEnvironment extends Runnable {
 
 	/**
 	 * executes a given action in the environment

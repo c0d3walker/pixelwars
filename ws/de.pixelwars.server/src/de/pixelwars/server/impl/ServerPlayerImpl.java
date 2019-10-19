@@ -1,16 +1,18 @@
 package de.pixelwars.server.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import de.pixelwars.core.IPlayer;
+import de.pixelwars.core.impl.AbstractOwnedElement;
 
-public class ServerPlayerImpl implements IPlayer {
+public class ServerPlayerImpl extends AbstractOwnedElement implements IPlayer {
 	private String _name;
-	private int _id;
 	private List<Integer> _buildings;
 
 	public ServerPlayerImpl(int id) {
-		_id = id;
+		super(id);
+		_buildings = new ArrayList<>();
 	}
 
 	public void setName(String name) {
@@ -24,11 +26,6 @@ public class ServerPlayerImpl implements IPlayer {
 	@Override
 	public String getName() {
 		return _name;
-	}
-
-	@Override
-	public int getID() {
-		return 0;
 	}
 
 	@Override
