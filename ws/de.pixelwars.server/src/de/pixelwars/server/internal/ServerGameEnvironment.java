@@ -1,6 +1,7 @@
 package de.pixelwars.server.internal;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.PriorityBlockingQueue;
@@ -12,6 +13,7 @@ import de.pixelwars.core.IBuilding;
 import de.pixelwars.core.IGameEnvironment;
 import de.pixelwars.core.ILocation;
 import de.pixelwars.core.IPlayer;
+import de.pixelwars.core.IPositionedElement;
 import de.pixelwars.core.IUnit;
 import de.pixelwars.core.impl.Location;
 import de.pixelwars.core.trees.KDTree;
@@ -74,7 +76,8 @@ public class ServerGameEnvironment implements IGameEnvironment {
 		return building;
 	}
 
-	private ServerPlayerImpl playerIdToPlayer(int ownerID) {
+	@Override
+	public ServerPlayerImpl playerIdToPlayer(int ownerID) {
 		ServerPlayerImpl owner = null;
 		for (int i = 0; i < _playerList.size() && owner == null; i++) {
 			var currentOwner = _playerList.get(i);
@@ -93,6 +96,11 @@ public class ServerGameEnvironment implements IGameEnvironment {
 		var unit = _coreElementFactory.createUnit(owner, unitType, location);
 		_elementArea.addElement(unit);
 		return unit;
+	}
+
+	@Override
+	public Collection<IPositionedElement> getElementsInArea(ILocation topLeft, ILocation bottomRight) {
+		return _elementArea.getElementsInArea(topLeft, bottomRight);
 	}
 
 }
