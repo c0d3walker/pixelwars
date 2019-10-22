@@ -23,7 +23,7 @@ public class CreatePlayerAction implements IAction {
 
 	@Override
 	public void execute(IGameEnvironment environment) {
-		var player = environment.createPlayer(_name);
+		var player = environment.createPlayer(_name,_connection);
 		var building = environment.buildBuilding(player.getID(), EBuildingConstants.MAIN, true);
 		var unit = environment.createUnit(player.getID(), EUnitConstants.WORKER);
 	}

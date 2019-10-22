@@ -1,106 +1,60 @@
 package de.pixelwars.server.internal;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Queue;
-import java.util.concurrent.PriorityBlockingQueue;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
-import de.pixelwars.core.EBuildingConstants;
-import de.pixelwars.core.EUnitConstants;
-import de.pixelwars.core.IAction;
+import de.pixelwars.core.EActionType;
 import de.pixelwars.core.IBuilding;
-import de.pixelwars.core.IGameEnvironment;
-import de.pixelwars.core.ILocation;
 import de.pixelwars.core.IPlayer;
-import de.pixelwars.core.IPositionedElement;
-import de.pixelwars.core.IUnit;
-import de.pixelwars.core.impl.Location;
-import de.pixelwars.core.trees.KDTree;
-import de.pixelwars.server.impl.ServerPlayerImpl;
+import de.pixelwars.core.exchange.StringTransportObject;
+import de.pixelwars.core.game.environment.AbstractGameEnvironment;
+import de.pixelwars.core.net.Connection;
 
-public class ServerGameEnvironment implements IGameEnvironment {
-
-	private Queue<ScheduledTask> _tasks;
-	private List<ServerPlayerImpl> _playerList;
-	private ServerCoreElementFactory _coreElementFactory;
-	private KDTree _elementArea;
+public class ServerGameEnvironment extends AbstractGameEnvironment {
+	private Map<IPlayer, Connection> _playerLookup;
 
 	public ServerGameEnvironment() {
-		_playerList = new ArrayList<>();
-		_coreElementFactory = new ServerCoreElementFactory();
-		_tasks = new PriorityBlockingQueue<ScheduledTask>(64, (c0, c1) -> {
-			return (int) (c0.getTimeToExecute() - c1.getTimeToExecute());
-		});
-		_elementArea = new KDTree();
+		_playerLookup = new HashMap<>();
 	}
 
 	@Override
-	public void run() {
-		// TODO replace with termination condition
-		while (true) {
-			var task = _tasks.peek();
-			if (task != null && task.getTimeToExecute() < System.currentTimeMillis()) {
-				var action = _tasks.poll().getAction();
-				action.execute(this);
-			} else {
-				try {
-					Thread.sleep(20);
-				} catch (InterruptedException ex) {
-					ex.printStackTrace();
-				}
+	public IPlayer createPlayer(String name, Connection connection) {
+		IPlayer player = null;
+		try {
+			sendCurrentStateToNewPlayer(connection);
+			player = super.createPlayer(name, null);
+			_playerLookup.put(player, connection);
+			for (IPlayer p : _playerList) {
+				var c = _playerLookup.get(p);
+				sendPlayerToConnection(connection, player);
 			}
+		} catch (IOException ex) {
+			ex.printStackTrace();
 		}
-	}
-
-	@Override
-	public void scheduleAction(IAction action) {
-		var scheduledTask = new ScheduledTask(System.currentTimeMillis(), action);
-		_tasks.add(scheduledTask);
-	}
-
-	@Override
-	public IPlayer createPlayer(String name) {
-		var player = _coreElementFactory.createPlayer(name);
-		_playerList.add(player);
 		return player;
 	}
 
-	@Override
-	public IBuilding buildBuilding(int ownerID, EBuildingConstants buildingType, boolean isBuild) {
-		// TODO refactor location as parameter
-		ILocation location = new Location(3, 4);
-		var owner = playerIdToPlayer(ownerID);
-		var building = _coreElementFactory.createBuilding(owner, buildingType, location, isBuild);
-		_elementArea.addElement(building);
-		return building;
-	}
+	private void sendCurrentStateToNewPlayer(Connection connection) throws IOException {
 
-	@Override
-	public ServerPlayerImpl playerIdToPlayer(int ownerID) {
-		ServerPlayerImpl owner = null;
-		for (int i = 0; i < _playerList.size() && owner == null; i++) {
-			var currentOwner = _playerList.get(i);
-			if (currentOwner.getID() == ownerID) {
-				owner = currentOwner;
-			}
+		for (IPlayer player : _playerList) {
+			sendPlayerToConnection(connection, player);
 		}
-		return owner;
+		for (IBuilding building : _buildingList) {
+			var values = new int[] { IBuilding.BUILDING_CONSTANT, building.getOwnerID(),
+					building.getBuildingType().ordinal() };
+		}
+
 	}
 
-	@Override
-	public IUnit createUnit(int ownerID, EUnitConstants unitType) {
-		// TODO refactor location as parameter
-		ILocation location = new Location(10, 11);
-		var owner = playerIdToPlayer(ownerID);
-		var unit = _coreElementFactory.createUnit(owner, unitType, location);
-		_elementArea.addElement(unit);
-		return unit;
-	}
-
-	@Override
-	public Collection<IPositionedElement> getElementsInArea(ILocation topLeft, ILocation bottomRight) {
-		return _elementArea.getElementsInArea(topLeft, bottomRight);
+	public void sendPlayerToConnection(Connection connection, IPlayer player) throws IOException {
+		var ownedBuildings = new StringBuilder();
+		for (int buildingID : player.getBuildings()) {
+			ownedBuildings.append(buildingID).append(',');
+		}
+		var values = new String[] { player.getID() + "", player.getName(), ownedBuildings.toString() };
+		var sto = new StringTransportObject(EActionType.CREATE_PLAYER, values);
+		connection.getOutputStream().writeObject(sto);
 	}
 
 }

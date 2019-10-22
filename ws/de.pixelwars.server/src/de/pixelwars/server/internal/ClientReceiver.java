@@ -5,6 +5,7 @@ import java.io.ObjectInputStream;
 
 import de.pixelwars.core.EActionType;
 import de.pixelwars.core.IGameEnvironment;
+import de.pixelwars.core.exchange.ClientState;
 import de.pixelwars.core.exchange.StringTransportObject;
 import de.pixelwars.core.net.Connection;
 import de.pixelwars.server.actions.CreatePlayerAction;

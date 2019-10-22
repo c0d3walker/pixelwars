@@ -1,4 +1,4 @@
-package de.pixelwars.server.impl;
+package de.pixelwars.core.impl;
 
 import java.util.Iterator;
 import java.util.List;
@@ -6,16 +6,15 @@ import java.util.List;
 import de.pixelwars.core.EUnitConstants;
 import de.pixelwars.core.IAction;
 import de.pixelwars.core.IUnit;
-import de.pixelwars.core.impl.AbstractOwnedElement;
 
-public class ServerUnitImpl extends AbstractOwnedElement implements IUnit {
+public class Unit extends AbstractOwnedElement implements IUnit {
 
 	private String _name;
 	private double _lifePoints;
 	private List<IAction> _actions;
 	private EUnitConstants _unitType;
 
-	public ServerUnitImpl(int id) {
+	public Unit(int id) {
 		super(id);
 	}
 

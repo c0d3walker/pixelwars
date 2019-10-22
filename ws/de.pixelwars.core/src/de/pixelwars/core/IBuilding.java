@@ -1,6 +1,8 @@
 package de.pixelwars.core;
 
-public interface IBuilding extends IDetailedInformation  {
+public interface IBuilding extends IDetailedInformation, IAdressableElement {
+
+	static final int BUILDING_CONSTANT = 1;
 
 	/**
 	 * @return the name of the building

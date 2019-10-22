@@ -7,23 +7,18 @@ import java.util.List;
 import de.pixelwars.core.EBuildingConstants;
 import de.pixelwars.core.IAction;
 import de.pixelwars.core.IBuilding;
-import de.pixelwars.core.IDetailedInformation;
-import de.pixelwars.core.ILocation;
-import de.pixelwars.core.IPlayer;
-import de.pixelwars.core.actions.impl.CreateCitizenAction;
 
-public class Building extends AbstractOwnedElement implements IBuilding {
+public class Building extends AbstractElement implements IBuilding {
 
 	private double _lifePoints;
 	private String _name;
+	private EBuildingConstants _buildingType;
+	private boolean _isBuilt;
+	private int _ownerID;
 	private List<IAction> _actions;
 
-	public Building(ILocation location) {
-		super(0);
-	}
-
-	public Building() {
-		this(new Location(0, 0));
+	public Building(int id) {
+		super(id);
 		_actions = new ArrayList<>();
 	}
 
@@ -35,9 +30,30 @@ public class Building extends AbstractOwnedElement implements IBuilding {
 		_lifePoints = lifePoints;
 	}
 
+	public void setType(EBuildingConstants buildingType) {
+		_buildingType = buildingType;
+	}
+
+	public void setIsBuilt(boolean isBuilt) {
+		_isBuilt = isBuilt;
+	}
+
+	public void setOwnerID(int id) {
+		_ownerID = id;
+	}
+
+	public void addAction(IAction action) {
+		_actions.add(action);
+	}
+
 	@Override
 	public String getName() {
 		return _name;
+	}
+
+	@Override
+	public int getOwnerID() {
+		return _ownerID;
 	}
 
 	@Override
@@ -45,30 +61,19 @@ public class Building extends AbstractOwnedElement implements IBuilding {
 		return _lifePoints;
 	}
 
-	/**
-	 * adds a certain action to the actions
-	 * 
-	 * @param action
-	 */
-	public void addAction(CreateCitizenAction action) {
-		_actions.add(action);
+	@Override
+	public EBuildingConstants getBuildingType() {
+		return _buildingType;
+	}
+
+	@Override
+	public boolean isBuilt() {
+		return _isBuilt;
 	}
 
 	@Override
 	public Iterator<IAction> getActions() {
 		return _actions.iterator();
-	}
-
-	@Override
-	public EBuildingConstants getBuildingType() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public boolean isBuilt() {
-		// TODO Auto-generated method stub
-		return false;
 	}
 
 }

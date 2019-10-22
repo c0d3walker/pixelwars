@@ -1,4 +1,4 @@
-package de.pixelwars.server.internal;
+package de.pixelwars.core.game.environment;
 
 import de.pixelwars.core.IAction;
 

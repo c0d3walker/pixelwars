@@ -6,8 +6,9 @@ import java.awt.event.MouseEvent;
 
 import javax.swing.JPanel;
 
-import de.pixelwars.core.BuildingFactory;
 import de.pixelwars.core.CoreElementFactory;
+import de.pixelwars.core.EBuildingConstants;
+import de.pixelwars.core.impl.Location;
 
 public class MapView extends JPanel {
 
@@ -23,8 +24,10 @@ public class MapView extends JPanel {
 				_infoView.showDetails(null);
 			}
 		});
-		var player = CoreElementFactory.createPlayer("Lu");
-		var building = BuildingFactory.createMain(player);
+		var factory = new CoreElementFactory();
+		var player = factory.createPlayer("Lu");
+		var location = new Location(4, 6);
+		var building = factory.createBuilding(player, EBuildingConstants.MAIN, location, true);
 		var wrapped = new BuildingWrapper();
 		wrapped.setBuilding(building);
 		wrapped.setLocation(50, 50);
@@ -37,7 +40,8 @@ public class MapView extends JPanel {
 
 		add(wrapped);
 
-		var mill = BuildingFactory.createMill(player);
+		location = new Location(10, 3);
+		var mill = factory.createBuilding(player, EBuildingConstants.MILL, location, true);
 		wrapped = new BuildingWrapper();
 		wrapped.setBuilding(mill);
 		wrapped.setLocation(85, 105);

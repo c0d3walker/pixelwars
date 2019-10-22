@@ -1,4 +1,4 @@
-package de.pixelwars.server.internal;
+package de.pixelwars.core.exchange;
 
 import java.util.ArrayList;
 import java.util.List;

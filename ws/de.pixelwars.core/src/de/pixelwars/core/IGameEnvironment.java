@@ -2,6 +2,8 @@ package de.pixelwars.core;
 
 import java.util.Collection;
 
+import de.pixelwars.core.net.Connection;
+
 public interface IGameEnvironment extends Runnable {
 
 	/**
@@ -12,12 +14,20 @@ public interface IGameEnvironment extends Runnable {
 	void scheduleAction(IAction action);
 
 	/**
+	 * executes a given action out of order
+	 * 
+	 * @param action
+	 */
+	void scheduleActionAsynchron(IAction action);
+
+	/**
 	 * creates a new player in the game
 	 * 
 	 * @param name
+	 * @param connection 
 	 * @return the created player
 	 */
-	IPlayer createPlayer(String name);
+	IPlayer createPlayer(String name, Connection connection);
 
 	/**
 	 * creates a new building to a certain place TODO take coordinates for placing
@@ -55,5 +65,5 @@ public interface IGameEnvironment extends Runnable {
 	 * @return a list including all elements which are in this area
 	 */
 	Collection<IPositionedElement> getElementsInArea(ILocation topLeft, ILocation bottomRight);
-
+	
 }

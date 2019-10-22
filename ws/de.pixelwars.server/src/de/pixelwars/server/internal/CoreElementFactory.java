@@ -1,5 +1,8 @@
-package de.pixelwars.core;
+package de.pixelwars.server.internal;
 
+import de.pixelwars.core.EBuildingConstants;
+import de.pixelwars.core.EUnitConstants;
+import de.pixelwars.core.ILocation;
 import de.pixelwars.core.impl.Building;
 import de.pixelwars.core.impl.Player;
 import de.pixelwars.core.impl.Unit;
