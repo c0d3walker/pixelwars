@@ -86,16 +86,16 @@ public class KDTreeNode<T> {
 					elements.add(element);
 				}
 			}
-		}
-		var lower = getRelevantValue(topLeft);
-		var upper = getRelevantValue(bottomRight);
+		} else {
+			var lower = getRelevantValue(topLeft);
+			var upper = getRelevantValue(bottomRight);
 
-		if (_splitValue < upper && _splitValue > lower) {
-			elements.addAll(_left.collectElementsInArea(topLeft, bottomRight));
-			elements.addAll(_right.collectElementsInArea(topLeft, bottomRight));
-		}
+			if (_splitValue < upper && _splitValue > lower) {
+				elements.addAll(_left.collectElementsInArea(topLeft, bottomRight));
+				elements.addAll(_right.collectElementsInArea(topLeft, bottomRight));
+			}
 
-		// TODO check for children
+		}
 		return elements;
 	}
 

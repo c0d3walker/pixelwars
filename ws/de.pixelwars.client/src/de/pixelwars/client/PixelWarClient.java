@@ -15,7 +15,7 @@ import de.pixelwars.core.exchange.DoubleTransportObject;
 import de.pixelwars.core.exchange.StringTransportObject;
 import de.pixelwars.core.net.Connection;
 
-public class PixelWarClient implements Runnable {
+public class PixelWarClient implements Runnable, IClient {
 
 	private Connection _connection;
 	private Socket _sock;
@@ -24,16 +24,16 @@ public class PixelWarClient implements Runnable {
 
 	public PixelWarClient() {
 		setupClientStateManagement();
-		_environment=new ClientGameEnvironment();
+		_environment = new ClientGameEnvironment(20, 20);
 	}
 
 	private void setupClientStateManagement() {
 		var init = new ClientState();
 		var receiveGameData = new ClientState();
-		
+
 		init.addTransmision(EActionType.CONNECTION_CONFIRMED, receiveGameData);
-		_state=init;
-		
+		_state = init;
+
 		receiveGameData.addTransmision(EActionType.CREATE_PLAYER, receiveGameData);
 		receiveGameData.addTransmision(EActionType.CREATE_BY_IDS, receiveGameData);
 	}
@@ -42,14 +42,15 @@ public class PixelWarClient implements Runnable {
 	public void run() {
 		try {
 			_connection = setupConnection("localhost", 8888);
-			sendTransportObject(new StringTransportObject(EActionType.CREATE_PLAYER, "Player"));
+
 			Object o;
 			while ((o = _connection.getInputStream().readObject()) != null) {
 				if (o instanceof StringTransportObject) {
 					handleStringTransportObjectRequest((StringTransportObject) o);
 				} else {
-					handleDoubleTransportObjectRequest((DoubleTransportObject)o);
-				}			}
+					handleDoubleTransportObjectRequest((DoubleTransportObject) o);
+				}
+			}
 		} catch (IOException | ClassNotFoundException e) {
 			e.printStackTrace();
 		} finally {
@@ -69,34 +70,42 @@ public class PixelWarClient implements Runnable {
 	private void handleDoubleTransportObjectRequest(DoubleTransportObject dto) {
 		EActionType actionType = dto.getActionType();
 		var nextState = _state.process(actionType);
-		if(nextState!=null) {
+		if (nextState != null) {
 			switch (actionType) {
 			case CREATE_BY_IDS:
-				var values=dto.getValues();
-				var elementType=values[0];//(unit / building)
-				var ownerID=values[1];
-				var subType=values[2];//(which unit / building)
-				var action=new CreateElementAction(elementType,ownerID,subType);
+				var values = dto.getValues();
+				var elementType = values[0];// (unit / building)
+				var id = values[1];
+				var ownerID = values[2];
+				var subType = values[3];// (which unit / building)
+				var action = new CreateElementAction(elementType, id, ownerID, subType);
 				_environment.scheduleAction(action);
 				break;
 			default:
-				System.err.println("Unexpected action type: "+actionType);
+				System.err.println("Unexpected action type: " + actionType);
 				break;
 			}
 		}
 	}
 
-	private void handleStringTransportObjectRequest(StringTransportObject sto) {
+	private void handleStringTransportObjectRequest(StringTransportObject sto) throws IOException {
 		EActionType actionType = sto.getActionType();
 		var nextState = _state.process(actionType);
 		if (nextState != null) {
 			switch (actionType) {
 			case CREATE_PLAYER:
-				var action = new CreatePlayerAction(sto.getValues()[0]);
+				var values = sto.getValues();
+				var id = Integer.parseInt(values[0]);
+				var action = new CreatePlayerAction(id, values[1]);
 				_environment.scheduleAction(action);
 				break;
 			case CONNECTION_CONFIRMED:
-				// do nothing
+				var stoConfirmation = new StringTransportObject(EActionType.CONNECTION_CONFIRMED);
+				sendTransportObject(stoConfirmation);
+				sendTransportObject(new StringTransportObject(EActionType.CREATE_PLAYER, "Player"));
+				var environmentThread = new Thread(_environment);
+				environmentThread.setName("Client environment");
+				environmentThread.start();
 				break;
 			default:
 				System.err.println("Unexpected action type: " + actionType);
@@ -105,11 +114,11 @@ public class PixelWarClient implements Runnable {
 			_state = nextState;
 //			System.out.println(sto.getActionType() + "" + sto.getValues()[0]);
 		} else {
-			System.err.println("Wrong type received: " + sto.getActionType());
-		}		
+			System.err.println("Wrong type received in client: " + sto.getActionType());
+		}
 	}
 
-	public void sendTransportObject(Serializable object) throws IOException {
+	private void sendTransportObjectInternal(Serializable object) throws IOException {
 		_connection.getOutputStream().writeObject(object);
 	}
 
@@ -117,10 +126,22 @@ public class PixelWarClient implements Runnable {
 		_sock = new Socket(host, port);
 		var oos = new ObjectOutputStream(_sock.getOutputStream());
 		var ois = new ObjectInputStream(_sock.getInputStream());
-		var confirmation = (StringTransportObject) ois.readObject();
-		var sto = new StringTransportObject(EActionType.CONNECTION_CONFIRMED);
-		oos.writeObject(sto);
+
 		return new Connection(oos, ois);
+	}
+
+	public IGameEnvironment getEnvironment() {
+		return _environment;
+	}
+
+	@Override
+	public void sendTransportObject(StringTransportObject sto) throws IOException {
+		sendTransportObjectInternal(sto);
+	}
+
+	@Override
+	public void sendTransportObject(DoubleTransportObject dto) throws IOException {
+		sendTransportObjectInternal(dto);
 	}
 
 }

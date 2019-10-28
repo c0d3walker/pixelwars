@@ -5,6 +5,11 @@ import java.util.Iterator;
 public interface IDetailedInformation extends IOwnedElement{
 
 	/**
+	 * @return the id of the corresponding selection
+	 */
+	int getID();
+	
+	/**
 	 * @return the name of the object
 	 */
 	String getName();

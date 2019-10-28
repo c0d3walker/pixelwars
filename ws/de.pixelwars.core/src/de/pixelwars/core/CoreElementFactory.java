@@ -26,8 +26,8 @@ public class CoreElementFactory {
 		return player;
 	}
 
-	public Building createBuilding(Player player, EBuildingConstants buildingType,
-			ILocation location, boolean isBuild) {
+	public Building createBuilding(Player player, EBuildingConstants buildingType, ILocation location,
+			boolean isBuild) {
 		int id = getID();
 		return createPlayerWithID(player, buildingType, location, isBuild, id);
 	}
@@ -45,11 +45,12 @@ public class CoreElementFactory {
 
 	public Unit createUnit(Player owner, EUnitConstants unitType, ILocation location) {
 		int id = getID();
-		return createUnitWithID(owner, location, id);
+		return createUnitWithID(owner, unitType, location, id);
 	}
 
-	public Unit createUnitWithID(Player owner, ILocation location, int id) {
+	public Unit createUnitWithID(Player owner, EUnitConstants unitType, ILocation location, int id) {
 		var unit = new Unit(id);
+		unit.setUnitType(unitType);
 		unit.setLocation(location);
 		unit.setOwnerID(owner.getID());
 		unit.setLifePoints(30);

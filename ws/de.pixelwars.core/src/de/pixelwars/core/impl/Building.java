@@ -48,7 +48,8 @@ public class Building extends AbstractElement implements IBuilding {
 
 	@Override
 	public String getName() {
-		return _name;
+		return getBuildingType().name();
+//		return _name;
 	}
 
 	@Override

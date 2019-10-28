@@ -5,15 +5,19 @@ import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
+import java.awt.Point;
 
 import javax.swing.BorderFactory;
-import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import de.pixelwars.client.IClient;
+import de.pixelwars.core.EActionType;
 import de.pixelwars.core.IDetailedInformation;
+import de.pixelwars.core.IGameEnvironment;
+import de.pixelwars.core.exchange.DoubleTransportObject;
 
 public class DetailInfoView extends JPanel {
 
@@ -21,17 +25,22 @@ public class DetailInfoView extends JPanel {
 	private JLabel _lifePointStatus;
 	private JLabel _ownerStatus;
 	private JPanel _actionPanel;
+	private int _currentSelection;
+	private IGameEnvironment _environment;
+	private IClient _client;
 
-	public DetailInfoView() {
+	public DetailInfoView(IClient client, IGameEnvironment environment) {
+		_environment = environment;
+		_client = client;
+		_currentSelection = -1;
 		setLayout(new GridLayout(1, 1));
-		JPanel container=new JPanel();
+		JPanel container = new JPanel();
 		add(container);
-		
+
 		container.setLayout(new FlowLayout(FlowLayout.LEFT));
 //		container.add(new JLabel("abc"));
 //		container.add(new JLabel("def"));
-		
-		
+
 //		Box.createHorizontalBox();
 
 //		var boxLayout = new FlowLayout();
@@ -40,7 +49,7 @@ public class DetailInfoView extends JPanel {
 		JPanel commonDetailPanel = new JPanel();
 		container.add(commonDetailPanel);
 		commonDetailPanel.setAlignmentY(Component.LEFT_ALIGNMENT);
-		
+
 		var l = new GridBagLayout();
 		commonDetailPanel.setLayout(l);
 
@@ -107,10 +116,12 @@ public class DetailInfoView extends JPanel {
 			_nameStatus.setText("");
 			_ownerStatus.setText("");
 			_lifePointStatus.setText("");
+			_currentSelection = -1;
 		} else {
+			_currentSelection = information.getID();
 			_nameStatus.setText(information.getName());
-//			var ownerName = information.getOwner() == null ? "" : information.getOwner().getName();
-			var ownerName ="Hugo";
+			var owner = _environment.playerIdToPlayer(information.getOwnerID());
+			var ownerName = owner.getName();
 			_ownerStatus.setText(ownerName);
 			_lifePointStatus.setText(information.getLifePoints() + "");
 			var actionIterator = information.getActions();
@@ -118,9 +129,18 @@ public class DetailInfoView extends JPanel {
 				var action = actionIterator.next();
 				var button = new JButton();
 				button.setText(action.getName());
-				button.addActionListener(ae->action.execute(null));
+				button.addActionListener(ae -> action.execute(null));
 				_actionPanel.add(button);
 			}
+		}
+	}
+
+	public void setTargetPositionForSelection(Point point) {
+		var dto = new DoubleTransportObject(EActionType.SET_TARGET_FOR_ELEMENT, _currentSelection, point.x, point.y);
+		try {
+			_client.sendTransportObject(dto);
+		} catch (Exception ex) {
+			ex.printStackTrace();
 		}
 	}
 }

@@ -6,7 +6,7 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="src" path="/de.pixelwars.server">
+	<classpathentry combineaccessrules="false" kind="src" path="/de.pixelwars.client">
 		<attributes>
 			<attribute name="module" value="true"/>
 		</attributes>
@@ -16,7 +16,12 @@
 			<attribute name="module" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry combineaccessrules="false" kind="src" path="/de.pixelwars.client">
+	<classpathentry kind="src" path="/de.pixelwars.server">
+		<attributes>
+			<attribute name="module" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry combineaccessrules="false" kind="src" path="/de.pixelwars.core">
 		<attributes>
 			<attribute name="module" value="true"/>
 		</attributes>

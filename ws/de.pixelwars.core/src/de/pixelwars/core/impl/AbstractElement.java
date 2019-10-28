@@ -7,19 +7,21 @@ import de.pixelwars.core.IPositionedElement;
 public abstract class AbstractElement implements IPositionedElement, IAdressableElement {
 
 	private ILocation _location;
-	
-	private int id;
 
 	private int _id;
 
 	public AbstractElement(int id) {
-		_id=id;
+		_id = id;
 	}
-	
+
+	public void setID(int id) {
+		_id = id;
+	}
+
 	public void setLocation(ILocation location) {
-		_location=location;
+		_location = location;
 	}
-	
+
 	@Override
 	public int getID() {
 		return _id;

@@ -17,7 +17,7 @@ import de.pixelwars.server.internal.ServerGameEnvironment;
 
 public class PixelWarConfigurationServer implements Runnable {
 	private List<Connection> _connections;
-	IGameEnvironment _environment;
+	private IGameEnvironment _environment;
 
 	public PixelWarConfigurationServer() {
 		_connections = new ArrayList<>();

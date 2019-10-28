@@ -1,5 +1,6 @@
 package de.pixelwars.core.impl;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -16,6 +17,7 @@ public class Unit extends AbstractOwnedElement implements IUnit {
 
 	public Unit(int id) {
 		super(id);
+		_actions=new ArrayList<>();
 	}
 
 	public void setName(String name) {
@@ -32,7 +34,8 @@ public class Unit extends AbstractOwnedElement implements IUnit {
 
 	@Override
 	public String getName() {
-		return _name;
+		return getUnitType().name();
+//		return _name;
 	}
 
 	@Override

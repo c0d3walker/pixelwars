@@ -6,9 +6,11 @@ import de.pixelwars.core.IGameEnvironment;
 public class CreatePlayerAction implements IAction {
 
 	private String _name;
+	private int _id;
 
-	public CreatePlayerAction(String name) {
+	public CreatePlayerAction(int id,String name) {
 		_name = name;
+		_id=id;
 	}
 
 	@Override
@@ -18,7 +20,7 @@ public class CreatePlayerAction implements IAction {
 
 	@Override
 	public void execute(IGameEnvironment environment) {
-		environment.createPlayer(_name,null);
+		environment.reconstructPlayer(_id, _name, null);
 	}
 
 }

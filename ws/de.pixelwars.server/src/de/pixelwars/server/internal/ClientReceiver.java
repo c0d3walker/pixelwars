@@ -1,14 +1,16 @@
 package de.pixelwars.server.internal;
 
 import java.io.IOException;
-import java.io.ObjectInputStream;
 
 import de.pixelwars.core.EActionType;
 import de.pixelwars.core.IGameEnvironment;
 import de.pixelwars.core.exchange.ClientState;
+import de.pixelwars.core.exchange.DoubleTransportObject;
 import de.pixelwars.core.exchange.StringTransportObject;
+import de.pixelwars.core.impl.Location;
 import de.pixelwars.core.net.Connection;
 import de.pixelwars.server.actions.CreatePlayerAction;
+import de.pixelwars.server.actions.SetTargetForElementAction;
 
 public class ClientReceiver implements Runnable {
 
@@ -29,6 +31,7 @@ public class ClientReceiver implements Runnable {
 		initial.addTransmision(EActionType.CONNECTION_CONFIRMED, established);
 		established.addTransmision(EActionType.CREATE_PLAYER, gameRunning);
 		gameRunning.addTransmision(EActionType.CREATE_BY_IDS, gameRunning);
+		gameRunning.addTransmision(EActionType.SET_TARGET_FOR_ELEMENT, gameRunning);
 		_state = initial;
 	}
 
@@ -40,11 +43,15 @@ public class ClientReceiver implements Runnable {
 			while ((o = ois.readObject()) != null) {
 				if (o instanceof StringTransportObject) {
 					handleStringTransportObjectRequest((StringTransportObject) o);
+				} else if (o instanceof DoubleTransportObject) {
+					handleDoubleTransportObjectRequest((DoubleTransportObject) o);
 				} else {
 					System.err.println("Received an unknown dto");
 				}
 			}
-		} catch (ClassNotFoundException | IOException e) {
+		} catch (ClassNotFoundException |
+
+				IOException e) {
 			e.printStackTrace();
 		} finally {
 			try {
@@ -52,6 +59,25 @@ public class ClientReceiver implements Runnable {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
+		}
+	}
+
+	private void handleDoubleTransportObjectRequest(DoubleTransportObject dto) {
+		EActionType actionType = dto.getActionType();
+		var nextState = _state.process(actionType);
+		if (nextState != null) {
+			switch (actionType) {
+			case SET_TARGET_FOR_ELEMENT:
+				var values=dto.getValues();
+				var id=(int)values[0];
+				var location=new Location((int)values[1],(int)values[2]);
+				var action=new SetTargetForElementAction(id,location);
+				break;
+			default:
+				break;
+			}
+		} else {
+			System.err.println("Wrong type received in client receiver: " + dto.getActionType());
 		}
 	}
 
@@ -73,7 +99,7 @@ public class ClientReceiver implements Runnable {
 			_state = nextState;
 //			System.out.println(sto.getActionType() + "" + sto.getValues()[0]);
 		} else {
-			System.err.println("Wrong type received: " + sto.getActionType());
+			System.err.println("Wrong type received in client receiver: " + sto.getActionType());
 		}
 	}
 

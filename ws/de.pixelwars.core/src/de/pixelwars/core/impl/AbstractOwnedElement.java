@@ -14,7 +14,7 @@ public abstract class AbstractOwnedElement extends AbstractElement implements IO
 	public void setOwnerID(int id) {
 		_ownerID = id;
 	}
-
+	
 	@Override
 	public int getOwnerID() {
 		return _ownerID;

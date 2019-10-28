@@ -2,6 +2,7 @@ package de.pixelwars.application;
 
 import de.pixelwars.client.PixelWarClient;
 import de.pixelwars.server.PixelWarConfigurationServer;
+import de.pixelwars.ui.GameWindow;
 
 public class PixelWars {
 
@@ -16,7 +17,8 @@ public class PixelWars {
 		clientThread.setName("Client Thread");
 		clientThread.start();
 
-//		GameWindow window = new GameWindow();
-//		window.setVisible(true);
+		var environment = client.getEnvironment();
+		GameWindow window = new GameWindow(client,environment);
+		window.setVisible(true);
 	}
 }
