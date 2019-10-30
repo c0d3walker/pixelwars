@@ -98,19 +98,30 @@ public interface IGameEnvironment extends Runnable {
 	Collection<IPositionedElement> getElementsInArea(ILocation topLeft, ILocation bottomRight);
 
 	/**
-	 * looks up the element on a certain position or null
+	 * looks up the element on a certain position
 	 * 
 	 * @param x
 	 * @param y
-	 * @return the element which is placed on the given coordinates or null
+	 * @return a proxy containing the placed element, null or indicates that the
+	 *         requested position doesn't lie in the model
 	 */
-	IPositionedElement getElement(int x, int y);
+	IProxy<IPositionedElement> getElement(int x, int y);
 
 	/**
-	 * transforms an id into the corresponding object or null if there isn't any element with the id
+	 * transforms an id into the corresponding object or null if there isn't any
+	 * element with the id
+	 * 
 	 * @param id
 	 * @return the corresponding object or null
 	 */
 	IAdressableElement getElementById(int id);
+
+	/**
+	 * sets an element to a certain location
+	 * 
+	 * @param id       of the element
+	 * @param location to which the element will be set
+	 */
+	void setElementTo(int id, ILocation location);
 
 }

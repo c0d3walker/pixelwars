@@ -15,7 +15,7 @@ public class GameWindow extends JFrame {
 
 	public GameWindow(IClient client, IGameEnvironment environment) {
 		super("Pixel Wars");
-		setSize(400, 400);
+//		setSize(800, 1000);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 		var defaultPane = this.getContentPane();
@@ -24,6 +24,7 @@ public class GameWindow extends JFrame {
 		createDefaultView();
 		var infoView = createDetailInfo(client,environment);
 		createMapView(infoView, environment);
+		pack();
 	}
 
 	private void createMapView(DetailInfoView infoView, IGameEnvironment environment) {

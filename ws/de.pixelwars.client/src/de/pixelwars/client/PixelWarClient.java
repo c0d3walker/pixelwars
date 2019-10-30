@@ -8,11 +8,13 @@ import java.net.Socket;
 
 import de.pixelwars.client.actions.CreateElementAction;
 import de.pixelwars.client.actions.CreatePlayerAction;
+import de.pixelwars.client.actions.UpdateUnitLocationAction;
 import de.pixelwars.core.EActionType;
 import de.pixelwars.core.IGameEnvironment;
 import de.pixelwars.core.exchange.ClientState;
 import de.pixelwars.core.exchange.DoubleTransportObject;
 import de.pixelwars.core.exchange.StringTransportObject;
+import de.pixelwars.core.impl.Location;
 import de.pixelwars.core.net.Connection;
 
 public class PixelWarClient implements Runnable, IClient {
@@ -30,12 +32,16 @@ public class PixelWarClient implements Runnable, IClient {
 	private void setupClientStateManagement() {
 		var init = new ClientState();
 		var receiveGameData = new ClientState();
+		var gameRunning = new ClientState();
 
 		init.addTransmision(EActionType.CONNECTION_CONFIRMED, receiveGameData);
 		_state = init;
 
 		receiveGameData.addTransmision(EActionType.CREATE_PLAYER, receiveGameData);
 		receiveGameData.addTransmision(EActionType.CREATE_BY_IDS, receiveGameData);
+		receiveGameData.addTransmision(EActionType.INITIALATION_FINISHED, gameRunning);
+
+		gameRunning.addTransmision(EActionType.UPDATE_UNIT_LOCATION, gameRunning);
 	}
 
 	@Override
@@ -71,15 +77,22 @@ public class PixelWarClient implements Runnable, IClient {
 		EActionType actionType = dto.getActionType();
 		var nextState = _state.process(actionType);
 		if (nextState != null) {
+			double[] values = dto.getValues();
+			var id = (int)values[0];
 			switch (actionType) {
 			case CREATE_BY_IDS:
-				var values = dto.getValues();
-				var elementType = values[0];// (unit / building)
-				var id = values[1];
+				var elementType = values[1];// (unit / building)
 				var ownerID = values[2];
 				var subType = values[3];// (which unit / building)
 				var action = new CreateElementAction(elementType, id, ownerID, subType);
 				_environment.scheduleAction(action);
+				break;
+			case UPDATE_UNIT_LOCATION:
+				var newX = (int) values[4];
+				var newY = (int) values[5];
+				var location = new Location(newX, newY);
+				var updateUnitLocationAction = new UpdateUnitLocationAction(id, location);
+				_environment.scheduleAction(updateUnitLocationAction);
 				break;
 			default:
 				System.err.println("Unexpected action type: " + actionType);
@@ -106,6 +119,8 @@ public class PixelWarClient implements Runnable, IClient {
 				var environmentThread = new Thread(_environment);
 				environmentThread.setName("Client environment");
 				environmentThread.start();
+				break;
+			case INITIALATION_FINISHED:
 				break;
 			default:
 				System.err.println("Unexpected action type: " + actionType);

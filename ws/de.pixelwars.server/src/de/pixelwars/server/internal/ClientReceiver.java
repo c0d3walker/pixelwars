@@ -72,6 +72,7 @@ public class ClientReceiver implements Runnable {
 				var id=(int)values[0];
 				var location=new Location((int)values[1],(int)values[2]);
 				var action=new SetTargetForElementAction(id,location);
+				_environment.scheduleAction(action);
 				break;
 			default:
 				break;

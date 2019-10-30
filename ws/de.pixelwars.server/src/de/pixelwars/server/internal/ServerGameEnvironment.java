@@ -9,6 +9,7 @@ import de.pixelwars.core.EActionType;
 import de.pixelwars.core.EBuildingConstants;
 import de.pixelwars.core.EUnitConstants;
 import de.pixelwars.core.IBuilding;
+import de.pixelwars.core.ILocation;
 import de.pixelwars.core.IPlayer;
 import de.pixelwars.core.IUnit;
 import de.pixelwars.core.exchange.DoubleTransportObject;
@@ -43,9 +44,9 @@ public class ServerGameEnvironment extends AbstractGameEnvironment {
 		return unit;
 	}
 
-	private DoubleTransportObject createUnitTransportObject(Unit unit, EActionType type) {
-		var values = new double[] { IUnit.UNIT_CONSTANT, unit.getID(), unit.getOwnerID(),
-				unit.getUnitType().ordinal() };
+	private DoubleTransportObject createUnitTransportObject(IUnit unit, EActionType type) {
+		var values = new double[] { unit.getID(), IUnit.UNIT_CONSTANT, unit.getOwnerID(), unit.getUnitType().ordinal(),
+				unit.getLocation().getX(), unit.getLocation().getY() };
 		return new DoubleTransportObject(type, values);
 	}
 
@@ -74,12 +75,11 @@ public class ServerGameEnvironment extends AbstractGameEnvironment {
 		for (IBuilding building : _buildingList) {
 			createBuildingTransportObject(building, EActionType.CREATE_BY_IDS);
 		}
-
 	}
 
 	public DoubleTransportObject createBuildingTransportObject(IBuilding building, EActionType type) {
-		var values = new double[] { IBuilding.BUILDING_CONSTANT, building.getOwnerID(),
-				building.getBuildingType().ordinal(), building.getBuildingType().ordinal() };
+		var values = new double[] { building.getID(), IBuilding.BUILDING_CONSTANT, building.getOwnerID(),
+				building.getBuildingType().ordinal() };
 		return new DoubleTransportObject(type, values);
 	}
 
@@ -102,6 +102,18 @@ public class ServerGameEnvironment extends AbstractGameEnvironment {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
+		}
+	}
+
+	@Override
+	public void setElementTo(int id, ILocation location) {
+		super.setElementTo(id, location);
+		var proxy = getElement(location.getX(), location.getY());
+
+		if (proxy.isPresent() && proxy.getValue() instanceof IUnit) {
+			var unit = (IUnit) proxy.getValue();
+			var dto = createUnitTransportObject(unit, EActionType.UPDATE_UNIT_LOCATION);
+			sendToAll(dto);
 		}
 	}
 }

@@ -2,7 +2,6 @@ package de.pixelwars.core.game.environment;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.PriorityBlockingQueue;
@@ -16,9 +15,11 @@ import de.pixelwars.core.IBuilding;
 import de.pixelwars.core.IGameEnvironment;
 import de.pixelwars.core.ILocation;
 import de.pixelwars.core.IPositionedElement;
+import de.pixelwars.core.IProxy;
 import de.pixelwars.core.impl.Building;
 import de.pixelwars.core.impl.Location;
 import de.pixelwars.core.impl.Player;
+import de.pixelwars.core.impl.Proxy;
 import de.pixelwars.core.impl.Unit;
 import de.pixelwars.core.net.Connection;
 import de.pixelwars.core.trees.KDTree;
@@ -31,7 +32,7 @@ public abstract class AbstractGameEnvironment implements IGameEnvironment {
 	protected KDTree _elementArea;
 	protected CoreElementFactory _coreElementFactory;
 	private IPositionedElement[][] _gameField;
-	private HashSet<IAdressableElement> _elements;
+	private List<IAdressableElement> _elements;
 
 	public AbstractGameEnvironment(int width, int height) {
 		_tasks = new PriorityBlockingQueue<ScheduledTask>(64, (c0, c1) -> {
@@ -42,11 +43,12 @@ public abstract class AbstractGameEnvironment implements IGameEnvironment {
 		_coreElementFactory = new CoreElementFactory();
 		_buildingList = new ArrayList<>();
 		_gameField = new IPositionedElement[width][height];
-		_elements = new HashSet<IAdressableElement>();
+		_elements = new ArrayList<>();
 	}
 
 	protected void setElement(IPositionedElement element, int newX, int newY) {
-		if (getElement(newX, newY) == null) {
+		IProxy<IPositionedElement> proxy = getElement(newX, newY);
+		if (proxy.isPresent()&&proxy.getValue() == null) {
 			var location = (Location) element.getLocation();
 			_gameField[location.getY()][location.getX()] = null;
 			_gameField[newY][newX] = element;
@@ -55,17 +57,21 @@ public abstract class AbstractGameEnvironment implements IGameEnvironment {
 	}
 
 	protected boolean setElementInitially(IPositionedElement element, int newX, int newY) {
-		var isSuccessful = getElement(newX, newY) == null;
-		if (isSuccessful) {
+		var proxy = getElement(newX, newY);
+		if (proxy.isPresent()&&proxy.getValue()==null) {
 			var location = (Location) element.getLocation();
 			location.setLocation(newX, newY);
 			_gameField[newY][newX] = element;
+			return true;
 		}
-		return isSuccessful;
+		return false;
 	}
 
-	public IPositionedElement getElement(int x, int y) {
-		return _gameField[y][x];
+	public IProxy<IPositionedElement> getElement(int x, int y) {
+		if (y < _gameField.length && x < _gameField[0].length && x >= 0 && y >= 0) {
+			return new Proxy<IPositionedElement>(_gameField[y][x], true);
+		}
+		return new Proxy<IPositionedElement>(null, false);
 	}
 
 	private void addToPositionManagement(ILocation location, IPositionedElement element) {
@@ -142,6 +148,7 @@ public abstract class AbstractGameEnvironment implements IGameEnvironment {
 		var building = _coreElementFactory.createBuilding(owner, buildingType, location, isBuild);
 		addToPositionManagement(location, building);
 		_buildingList.add(building);
+		_elements.add(building);
 		return building;
 	}
 
@@ -159,6 +166,7 @@ public abstract class AbstractGameEnvironment implements IGameEnvironment {
 		var owner = playerIdToPlayer(ownerID);
 		var unit = _coreElementFactory.createUnit(owner, unitType, location);
 		addToPositionManagement(location, unit);
+		_elements.add(unit);
 		return unit;
 	}
 
@@ -171,7 +179,16 @@ public abstract class AbstractGameEnvironment implements IGameEnvironment {
 
 	@Override
 	public IAdressableElement getElementById(int id) {
-		// TODO look up
-		return null;
+		var finding = _elements.stream().filter(e -> e.getID() == id).findFirst();
+		return finding.isPresent() ? finding.get() : null;
+	}
+
+	@Override
+	public void setElementTo(int id, ILocation location) {
+		var element = getElementById(id);
+		if (element instanceof Unit) {
+			var unit = (Unit) element;
+			setElement(unit, location.getX(), location.getY());
+		}
 	}
 }
