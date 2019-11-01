@@ -26,6 +26,7 @@ import de.pixelwars.core.trees.KDTree;
 
 public abstract class AbstractGameEnvironment implements IGameEnvironment {
 
+	private static final long DEFAULT_WAIT_DURATION = 20;
 	protected List<Player> _playerList;
 	protected List<IBuilding> _buildingList;
 	protected Queue<ScheduledTask> _tasks;
@@ -48,7 +49,7 @@ public abstract class AbstractGameEnvironment implements IGameEnvironment {
 
 	protected void setElement(IPositionedElement element, int newX, int newY) {
 		IProxy<IPositionedElement> proxy = getElement(newX, newY);
-		if (proxy.isPresent()&&proxy.getValue() == null) {
+		if (proxy.isPresent() && proxy.getValue() == null) {
 			var location = (Location) element.getLocation();
 			_gameField[location.getY()][location.getX()] = null;
 			_gameField[newY][newX] = element;
@@ -58,7 +59,7 @@ public abstract class AbstractGameEnvironment implements IGameEnvironment {
 
 	protected boolean setElementInitially(IPositionedElement element, int newX, int newY) {
 		var proxy = getElement(newX, newY);
-		if (proxy.isPresent()&&proxy.getValue()==null) {
+		if (proxy.isPresent() && proxy.getValue() == null) {
 			var location = (Location) element.getLocation();
 			location.setLocation(newX, newY);
 			_gameField[newY][newX] = element;
@@ -118,7 +119,13 @@ public abstract class AbstractGameEnvironment implements IGameEnvironment {
 				action.execute(this);
 			} else {
 				try {
-					Thread.sleep(20);
+					var nextTask = _tasks.poll();
+					var nextExecution = nextTask.getTimeToExecute() - System.currentTimeMillis();
+					if (nextExecution > DEFAULT_WAIT_DURATION) {
+						Thread.sleep(DEFAULT_WAIT_DURATION);
+					} else {
+						Thread.sleep(nextExecution);
+					}
 				} catch (InterruptedException ex) {
 					ex.printStackTrace();
 				}
