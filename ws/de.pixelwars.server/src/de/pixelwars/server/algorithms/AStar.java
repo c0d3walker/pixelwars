@@ -3,7 +3,6 @@ package de.pixelwars.server.algorithms;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.PriorityQueue;
 
 import de.pixelwars.core.IBuilding;
 import de.pixelwars.core.IGameEnvironment;
@@ -15,7 +14,7 @@ public class AStar {
 	public List<ILocation> shortestPath(ILocation from, ILocation to, IGameEnvironment environment) {
 		var directions = getDirections();
 		var visitedLocations = new HashSet<ILocation>();
-		var priorityQueue = new PriorityQueue<Step>((s0, s1) -> {
+		var priorityQueue = new Heap<Step>((s0, s1) -> {
 			return s0.getDistance() - s1.getDistance();
 		});
 
@@ -41,10 +40,16 @@ public class AStar {
 						if (!(fieldContent instanceof IBuilding)) {
 							var distance = element.getDistance() + l1distance(nextLocation, target);
 							Step successor = new Step(nextLocation, distance);
-							if(priorityQueue.contains(successor)) {
-							}
 							successor.setPredecessor(element);
-							priorityQueue.add(successor);
+							var currentIndex = priorityQueue.indexOf(successor);
+							if (currentIndex > 0) {
+								var queued = priorityQueue.get(currentIndex);
+								if (queued.getDistance() > distance) {
+									priorityQueue.updateEntry(successor, currentIndex);
+								}
+							} else {
+								priorityQueue.add(successor);
+							}
 						}
 					}
 				} else {
